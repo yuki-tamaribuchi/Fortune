@@ -1,0 +1,26 @@
+version: '3'
+
+
+services:
+  frontend:
+    image: node:17-slim
+    ports:
+      - 3000:3000
+    volumes:
+      - ../frontend:/app
+    environment:
+      - NODE_OPTIONS=--openssl-legacy-provider
+    command: bash -c "cd app && npm install --silent && HOST=0.0.0.0 npm start"
+
+  backend:
+    build:
+      context: ..
+      dockerfile: .docker/backend/Dockerfile
+    ports:
+      - 8000:8000
+    env_file:
+      - backend/.env
+    volumes:
+      - ../backend/requirements.txt:/requirements.txt
+      - ../backend/src:/app
+    command: bash -c "pip3 install -r requirements.txt && cd app && uvicorn main:app --host 0.0.0.0 --reload" 
