@@ -1,24 +1,22 @@
-import json
-import random
-
 from fastapi import FastAPI
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyClientCredentials
 
+import random
 
 
 sp = Spotify(client_credentials_manager=SpotifyClientCredentials())
 
-app = FastAPI(title="FastAPI")
-
-
-@app.get("/")
-def read_root():
-	return {"Message":"Welcome to fortune!"}
+app = FastAPI(title="Fortune")
 
 
 @app.get("/tracks/recommend")
-def read_recommendation():
+def read_fortune_track():
+
+	data = get_track_from_spotify()
+	return data
+
+def get_track_from_spotify():
 	seed_genres = sp.recommendation_genre_seeds()
 	seed_genres = seed_genres["genres"]
 	genre_random_index = random.randint(0, len(seed_genres))
