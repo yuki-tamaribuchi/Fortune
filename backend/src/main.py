@@ -1,39 +1,37 @@
-from fastapi import FastAPI
-from spotipy import Spotify
-from spotipy.oauth2 import SpotifyClientCredentials
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
 
-import random
+from crud import create_history, create_user, create_users_history
+from database import SessionLocal
+from schemas import UserCreate
+
+from spotify import get_track_from_spotify
 
 
-sp = Spotify(client_credentials_manager=SpotifyClientCredentials())
+#Base.metadata.create_all(bind=engine)
+
+def get_db():
+	db = SessionLocal()
+	try:
+		yield db
+	finally:
+		db.close()
+
 
 app = FastAPI(title="Fortune")
 
 
+
 @app.get("/tracks/recommend")
-def read_fortune_track():
+def read_fortune_track(db:Session=Depends(get_db)):
 
 	data = get_track_from_spotify()
+	create_history(db=db, spotify_song_id=data['id'])
+	create_users_history(db=db, user_id=1, spotify_song_id=data['id'])
 	return data
 
-def get_track_from_spotify():
-	seed_genres = sp.recommendation_genre_seeds()
-	seed_genres = seed_genres["genres"]
-	genre_random_index = random.randint(0, len(seed_genres))
-	tracks = sp.recommendations(seed_genres=[seed_genres[genre_random_index]])
-	tracks = tracks["tracks"]
-	track_random_index = random.randint(0, len(tracks))
-	track = tracks[track_random_index]
 
-	artists = []
-	for artist in track['artists']:
-		artists.append(artist['name'])
-
-	result = {
-		'track_name': track['name'],
-		'artists': artists,
-		'preview_url': track['preview_url'],
-		'spotify_link': track['external_urls']['spotify'],
-		'id': track['id']
-	}
-	return result
+@app.post("/users/create")
+def user_creation(user:UserCreate, db:Session=Depends(get_db)):
+	user_instance = create_user(username=user.username, password=user.password, db=db)
+	return user_instance
