@@ -1,3 +1,6 @@
 fastapi==0.70
 spotipy==2.18
 uvicorn==0.15
+SQLAlchemy==1.4.28
+PyMySQL==1.0.2
+alembic==1.7.5
