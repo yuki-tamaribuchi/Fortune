@@ -29,7 +29,10 @@ def create_user(db:Session, username:str, password:str):
 
 def read_user(db:Session, username:str):
 	statement = select(User).filter_by(username=username)
-	result = db.execute(statement).first()._asdict()['User']
+	try:
+		result = db.execute(statement).first()._asdict()['User']
+	except:
+		result = None
 
 	return result
 
