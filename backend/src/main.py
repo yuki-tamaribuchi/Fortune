@@ -1,13 +1,20 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.functions import user
+from sqlalchemy.sql.expression import select
+from models import User
+
+
 
 from crud import create_history, create_user, create_users_history, read_user
 from database import SessionLocal
 from schemas import UserCreate, UserLogin
+from auth_handler import signJWT, decodeJWT
+from auth_bearer import JWTBearer
 
 from spotify import get_track_from_spotify
 from utils import calc_hash
+
 
 
 #Base.metadata.create_all(bind=engine)
@@ -23,34 +30,53 @@ def get_db():
 app = FastAPI(title="Fortune")
 
 
+origins = [
+	'http://127.0.0.1:8000',
+	'http://127.0.0.1:3000'
+]
+
+app.add_middleware(
+	CORSMiddleware,
+	allow_origins=origins,
+	allow_credentials=True,
+	allow_methods=['*'],
+	allow_headers=['*']
+)
+
+
+
 
 @app.get("/tracks/recommend")
 def read_fortune_track(db:Session=Depends(get_db)):
-
 	data = get_track_from_spotify()
 	create_history(db=db, spotify_song_id=data['id'])
-	create_users_history(db=db, user_id=1, spotify_song_id=data['id'])
+	return data
+
+
+@app.get("/tracks/recommend/authed")
+def read_fortune_track(db:Session=Depends(get_db), jwt_payload=Depends(JWTBearer())):
+	data = get_track_from_spotify()
+	decoded_payload = decodeJWT(jwt_payload)
+	user_instance = read_user(db=db, username=decoded_payload['username'])
+	create_users_history(db=db, user_id=user_instance.id, spotify_song_id=data['id'])
 	return data
 
 
 @app.post("/users/create")
 def user_creation(user:UserCreate, db:Session=Depends(get_db)):
 	user_instance = create_user(username=user.username, password=user.password, db=db)
-	return user_instance
+	return signJWT(user_instance.username)
 
 
 @app.post("/users/login")
 def user_login(user:UserLogin, db:Session=Depends(get_db)):
 	user_instance = read_user(db, username=user.username)
-	hashed_password = calc_hash(password=user.password, salt=bytes.fromhex(user_instance.salt)).hex()
+	if user_instance:
+		hashed_password = calc_hash(password=user.password, salt=bytes.fromhex(user_instance.salt)).hex()
 
-	if hashed_password == user_instance.password:
-		data = {
-			'status':'success'
-		}
+		if hashed_password == user_instance.password:
+			return signJWT(user_instance.username)
+		else:
+			raise HTTPException(status_code=401, detail="Password is wrong")
 	else:
-		data = {
-			'status':'failed'
-		}
-
-	return data
+		raise HTTPException(status_code=401, detail="Username is wrong")
