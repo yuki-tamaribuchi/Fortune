@@ -1,20 +1,15 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import select
-from models import User
-
 
 
 from crud import create_history, create_user, create_users_history, read_user
 from database import SessionLocal
 from schemas import UserCreate, UserLogin
-from auth_handler import signJWT, decodeJWT
+from auth_handler import signJWT, decodeJWT, authentication
 from auth_bearer import JWTBearer
 
 from spotify import get_track_from_spotify
-from utils import calc_hash
-
 
 
 #Base.metadata.create_all(bind=engine)
@@ -70,13 +65,4 @@ def user_creation(user:UserCreate, db:Session=Depends(get_db)):
 
 @app.post("/users/login")
 def user_login(user:UserLogin, db:Session=Depends(get_db)):
-	user_instance = read_user(db, username=user.username)
-	if user_instance:
-		hashed_password = calc_hash(password=user.password, salt=bytes.fromhex(user_instance.salt)).hex()
-
-		if hashed_password == user_instance.password:
-			return signJWT(user_instance.username)
-		else:
-			raise HTTPException(status_code=401, detail="Password is wrong")
-	else:
-		raise HTTPException(status_code=401, detail="Username is wrong")
+	return authentication(db, user)
