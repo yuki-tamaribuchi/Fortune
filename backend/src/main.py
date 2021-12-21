@@ -1,11 +1,11 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 
-from crud import create_history, create_user, create_users_history, read_user
+from crud import create_history, create_user, create_users_history, read_user, delete_user
 from database import SessionLocal
-from schemas import UserCreate, UserLogin
+from schemas import UserCreate, UserLogin, UserDelete
 from auth_handler import signJWT, decodeJWT, authentication
 from auth_bearer import JWTBearer
 
@@ -68,5 +68,13 @@ def user_login(user:UserLogin, db:Session=Depends(get_db)):
 	user_instance = authentication(db, user)
 	if user_instance:
 		return signJWT(user_instance.username)
+	else:
+		raise HTTPException(401)
+
+@app.delete("/users/delete", status_code=status.HTTP_200_OK)
+def user_delete(user:UserDelete, db:Session=Depends(get_db)):
+	user_instance = authentication(db, user)
+	if user_instance:
+		delete_user(db, user_instance)
 	else:
 		raise HTTPException(401)
