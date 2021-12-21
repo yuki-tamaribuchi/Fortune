@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
@@ -65,4 +65,8 @@ def user_creation(user:UserCreate, db:Session=Depends(get_db)):
 
 @app.post("/users/login")
 def user_login(user:UserLogin, db:Session=Depends(get_db)):
-	return authentication(db, user)
+	user_instance = authentication(db, user)
+	if user_instance:
+		return signJWT(user_instance.username)
+	else:
+		raise HTTPException(404, 'User not found')

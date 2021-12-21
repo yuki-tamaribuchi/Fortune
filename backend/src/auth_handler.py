@@ -3,8 +3,6 @@ import os
 import time
 from typing import Dict
 
-from fastapi import HTTPException
-
 
 from crud import read_user
 from schemas import UserAuthenticate
@@ -45,8 +43,6 @@ def authentication(db, user:UserAuthenticate):
 		hashed_password = calc_hash(password=user.password, salt=bytes.fromhex(user_instance.salt)).hex()
 
 		if hashed_password == user_instance.password:
-			return signJWT(user_instance.username)
-		else:
-			raise HTTPException(status_code=401, detail="Password is wrong")
+			return user_instance
 	else:
-		raise HTTPException(status_code=401, detail="Username is wrong")
+		return None
