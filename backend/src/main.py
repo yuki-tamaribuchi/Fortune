@@ -69,4 +69,4 @@ def user_login(user:UserLogin, db:Session=Depends(get_db)):
 	if user_instance:
 		return signJWT(user_instance.username)
 	else:
-		raise HTTPException(404, 'User not found')
+		raise HTTPException(401)
