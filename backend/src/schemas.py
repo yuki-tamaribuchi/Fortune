@@ -23,11 +23,20 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
 	password: str
 
+class UserAuthenticate(UserBase):
+	password: str
+
+class UserLogin(UserAuthenticate):
+	pass
+
+class UserDelete(UserAuthenticate):
+	pass
+
 class User(UserBase):
 	id: int
 	is_active: bool
-	password: bytes
-	salt: bytes
+	password: str
+	salt: str
 
 	class Config:
 		orm_mode = True
