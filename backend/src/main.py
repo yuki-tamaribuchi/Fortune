@@ -40,7 +40,6 @@ app.add_middleware(
 
 
 
-
 @app.get("/tracks/recommend")
 def read_fortune_track(db:Session=Depends(get_db)):
 	data = get_track_from_spotify()
@@ -57,13 +56,13 @@ def read_fortune_track(db:Session=Depends(get_db), jwt_payload=Depends(JWTBearer
 	return data
 
 
-@app.post("/users/create")
+@app.post("/register")
 def user_creation(user:UserCreate, db:Session=Depends(get_db)):
 	user_instance = create_user(username=user.username, password=user.password, db=db)
 	return signJWT(user_instance.username)
 
 
-@app.post("/users/login")
+@app.post("/login")
 def user_login(user:UserLogin, db:Session=Depends(get_db)):
 	user_instance = authentication(db, user)
 	if user_instance:
@@ -71,7 +70,8 @@ def user_login(user:UserLogin, db:Session=Depends(get_db)):
 	else:
 		raise HTTPException(401)
 
-@app.delete("/users/delete", status_code=status.HTTP_200_OK)
+
+@app.delete("/users", status_code=status.HTTP_200_OK)
 def user_delete(user:UserDelete, db:Session=Depends(get_db)):
 	user_instance = authentication(db, user)
 	if user_instance:
