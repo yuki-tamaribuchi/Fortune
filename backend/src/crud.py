@@ -20,11 +20,14 @@ def create_user(db:Session, username:str, password:str):
 
 	salt, key = hash_password(password)
 
-	db_user = User(username=username, password=key, salt=salt)
-	db.add(db_user)
-	db.commit()
-	db.refresh(db_user)
-	return db_user
+	try:
+		db_user = User(username=username, password=key, salt=salt)
+		db.add(db_user)
+		db.commit()
+		db.refresh(db_user)
+		return db_user
+	except:
+		return
 
 
 def delete_user(db:Session, username_instance):
