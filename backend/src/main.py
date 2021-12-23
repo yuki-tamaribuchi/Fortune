@@ -9,6 +9,8 @@ from schemas import UserCreate, UserLogin, UserDelete
 from auth_handler import signJWT, decodeJWT, authentication
 from auth_bearer import JWTBearer
 
+from routers import users
+
 from spotify import get_track_from_spotify
 
 
@@ -38,6 +40,7 @@ app.add_middleware(
 	allow_headers=['*']
 )
 
+app.include_router(users.router)
 
 
 @app.get("/tracks/recommend")
@@ -54,46 +57,3 @@ def read_fortune_track(db:Session=Depends(get_db), jwt_payload=Depends(JWTBearer
 	user_instance = read_user(db=db, username=decoded_payload['username'])
 	create_users_history(db=db, user_id=user_instance.id, spotify_song_id=data['id'])
 	return data
-
-
-@app.post("/register")
-def user_creation(user:UserCreate, db:Session=Depends(get_db)):
-	user_instance = create_user(username=user.username, password=user.password, db=db)
-	return signJWT(user_instance.username)
-
-
-@app.post("/login")
-def user_login(user:UserLogin, db:Session=Depends(get_db)):
-	user_instance = authentication(db, user)
-	if user_instance:
-		return signJWT(user_instance.username)
-	else:
-		raise HTTPException(401)
-
-
-@app.get("/users/")
-def myself_read(db:Session=Depends(get_db), jwt_payload=Depends(JWTBearer())):
-	decoded_payload = decodeJWT(jwt_payload)
-	user_instance = read_user(db=db, username=decoded_payload['username'])
-	if user_instance:
-		return user_instance
-	else:
-		raise HTTPException(404)
-
-
-@app.get("/users/{username}")
-def user_read(username:str , db:Session=Depends(get_db)):
-	user_instance = read_user(db=db, username=username)
-	if user_instance:
-		return user_instance
-	else:
-		raise HTTPException(404)
-
-
-@app.delete("/users", status_code=status.HTTP_200_OK)
-def user_delete(user:UserDelete, db:Session=Depends(get_db)):
-	user_instance = authentication(db, user)
-	if user_instance:
-		delete_user(db, user_instance)
-	else:
-		raise HTTPException(401)
