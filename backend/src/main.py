@@ -71,6 +71,15 @@ def user_login(user:UserLogin, db:Session=Depends(get_db)):
 		raise HTTPException(401)
 
 
+@app.get("/users/{username}")
+def user_read(username:str , db:Session=Depends(get_db)):
+	user_instance = read_user(db=db, username=username)
+	if user_instance:
+		return user_instance
+	else:
+		raise HTTPException(404)
+
+
 @app.delete("/users", status_code=status.HTTP_200_OK)
 def user_delete(user:UserDelete, db:Session=Depends(get_db)):
 	user_instance = authentication(db, user)
