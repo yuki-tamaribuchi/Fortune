@@ -2,10 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_db
-from crud import create_user, read_user, delete_user
+from cruds.users import create_user, read_user, delete_user
 from schemas import UserCreate, UserLogin, UserDelete
 from auth_handler import signJWT, decodeJWT, authentication
 from auth_bearer import JWTBearer
+
 
 router = APIRouter()
 
