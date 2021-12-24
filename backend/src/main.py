@@ -2,8 +2,6 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-
-from crud import create_history, create_user, create_users_history, read_user, delete_user
 from database import SessionLocal
 from schemas import UserCreate, UserLogin, UserDelete
 from auth_handler import signJWT, decodeJWT, authentication
