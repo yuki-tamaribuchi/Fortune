@@ -4,7 +4,7 @@ import time
 from typing import Dict
 
 
-from crud import read_user
+from cruds.users import read_user
 from schemas import UserAuthenticate
 from utils import calc_hash
 
