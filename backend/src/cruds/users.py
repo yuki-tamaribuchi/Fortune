@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 from models import User
+from schemas import UserUpdate
 
 #https://nitratine.net/blog/post/how-to-hash-passwords-in-python/
 def create_user(db:Session, username:str, password:str, handle:str, profile_image:str):
@@ -21,6 +22,20 @@ def create_user(db:Session, username:str, password:str, handle:str, profile_imag
 		db.commit()
 		db.refresh(db_user)
 		return db_user
+	except:
+		return
+
+
+def update_user(db:Session, username:str, user_update_data:UserUpdate):
+	try:
+		db.query(User).filter(User.username==username).update(
+			{
+				User.handle:user_update_data.handle,
+				User.profile_image:user_update_data.profile_image
+			}
+		)
+		db.commit()
+		return True
 	except:
 		return
 
