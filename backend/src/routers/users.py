@@ -2,17 +2,18 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_db
-from cruds.users import create_user, read_user, delete_user
-from schemas import UserCreate, UserLogin, UserDelete
+from cruds.users import create_user, read_user, delete_user, update_user
+from schemas import UserCreate, UserLogin, UserDelete, UserUpdate
 from auth_handler import signJWT, decodeJWT, authentication
 from auth_bearer import JWTBearer
 
 
 router = APIRouter()
 
+
 @router.post("/register/")
 async def register_user(user:UserCreate, db:Session=Depends(get_db)):
-	user_instance = create_user(db=db, username=user.username, password=user.password)
+	user_instance = create_user(db=db, username=user.username, password=user.password, handle=user.handle, profile_image=user.profile_image)
 	if user_instance:
 		return signJWT(user_instance.username)
 	return HTTPException(409)
@@ -43,6 +44,12 @@ async def user_read(username:str , db:Session=Depends(get_db)):
 		return user_instance
 	else:
 		raise HTTPException(404)
+
+
+@router.post("/users/")
+async def user_update(user_update_data:UserUpdate ,db:Session=Depends(get_db), jwt_payload=Depends(JWTBearer())):
+	decoded_payload = decodeJWT(jwt_payload)
+	user_updated_instance = update_user(db=db, username=decoded_payload['username'], user_update_data=user_update_data)
 
 
 @router.delete("/users", status_code=status.HTTP_200_OK)
