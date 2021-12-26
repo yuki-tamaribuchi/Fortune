@@ -20,13 +20,22 @@ class History(HistoryBase):
 class UserBase(BaseModel):
 	username: Optional[constr(max_length=32)]
 
-class UserCreate(UserBase):
+
+class UserProfileBase(BaseModel):
+	handle: Optional[constr(max_length=30)]
+	profile_image: Optional[constr(max_length=100)]
+	
+
+class UserCreate(UserBase, UserProfileBase):
 	password: str
 
 class UserAuthenticate(UserBase):
 	password: str
 
 class UserLogin(UserAuthenticate):
+	pass
+
+class UserUpdate(UserProfileBase):
 	pass
 
 class UserDelete(UserAuthenticate):
@@ -37,6 +46,7 @@ class User(UserBase):
 	is_active: bool
 	password: str
 	salt: str
+	
 
 	class Config:
 		orm_mode = True
