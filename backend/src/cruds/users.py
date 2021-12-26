@@ -4,13 +4,19 @@ from sqlalchemy import select
 from models import User
 
 #https://nitratine.net/blog/post/how-to-hash-passwords-in-python/
-def create_user(db:Session, username:str, password:str):
+def create_user(db:Session, username:str, password:str, handle:str, profile_image:str):
 	from utils import hash_password
 
 	salt, key = hash_password(password)
 
 	try:
-		db_user = User(username=username, password=key, salt=salt)
+		db_user = User(
+			username=username,
+			password=key,
+			salt=salt,
+			handle=handle,
+			profile_image=profile_image
+		)
 		db.add(db_user)
 		db.commit()
 		db.refresh(db_user)
