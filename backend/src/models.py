@@ -17,6 +17,8 @@ class User(Base):
 	password = Column(String(length=64))
 	salt = Column(String(length=64))
 	is_active = Column(Boolean, default=True)
+	handle = Column(String(length=30))
+	profile_image = Column(String(length=100))
 
 class UsersHistory(Base):
 	__tablename__ = "users_histories"
