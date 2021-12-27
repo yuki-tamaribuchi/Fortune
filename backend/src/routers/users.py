@@ -16,7 +16,7 @@ async def register_user(user:UserCreate, db:Session=Depends(get_db)):
 	user_instance = create_user(db=db, username=user.username, password=user.password, handle=user.handle, profile_image=user.profile_image)
 	if user_instance:
 		return signJWT(user_instance.username)
-	return HTTPException(409)
+	raise HTTPException(409)
 
 
 @router.post("/login/")
