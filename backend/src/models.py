@@ -13,7 +13,7 @@ class User(Base):
 	__tablename__ = "users"
 
 	id = Column(Integer, primary_key=True, index=True)
-	username = Column(String(length=32))
+	username = Column(String(length=32), unique=True)
 	password = Column(String(length=64))
 	salt = Column(String(length=64))
 	is_active = Column(Boolean, default=True)
