@@ -1,15 +1,8 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
 
 from database import SessionLocal
-from schemas import UserCreate, UserLogin, UserDelete
-from auth_handler import signJWT, decodeJWT, authentication
-from auth_bearer import JWTBearer
-
-from routers import users
-
-from spotify import get_track_from_spotify
+from routers import users, histories
 
 
 #Base.metadata.create_all(bind=engine)
@@ -39,19 +32,4 @@ app.add_middleware(
 )
 
 app.include_router(users.router)
-
-
-@app.get("/tracks/recommend")
-def read_fortune_track(db:Session=Depends(get_db)):
-	data = get_track_from_spotify()
-	create_history(db=db, spotify_song_id=data['id'])
-	return data
-
-
-@app.get("/tracks/recommend/authed")
-def read_fortune_track(db:Session=Depends(get_db), jwt_payload=Depends(JWTBearer())):
-	data = get_track_from_spotify()
-	decoded_payload = decodeJWT(jwt_payload)
-	user_instance = read_user(db=db, username=decoded_payload['username'])
-	create_users_history(db=db, user_id=user_instance.id, spotify_song_id=data['id'])
-	return data
+app.include_router(histories.router)
