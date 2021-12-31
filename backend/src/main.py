@@ -1,18 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from database import SessionLocal
 from routers import users, histories
 
 
 #Base.metadata.create_all(bind=engine)
-
-def get_db():
-	db = SessionLocal()
-	try:
-		yield db
-	finally:
-		db.close()
 
 
 app = FastAPI(title="Fortune")
