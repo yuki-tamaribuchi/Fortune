@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from auth_handler import decodeJWT
-from auth_bearer import JWTBearer
+from auth.jwt import decodeJWT
+from auth.bearer import JWTBearer
 from dependencies import get_db
 from cruds.histories import create_history, create_users_history
 from cruds.users import read_user

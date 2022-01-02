@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 from dependencies import get_db
 from cruds.users import create_user, read_user, delete_user, update_user
 from schemas import UserCreate, UserLogin, UserDelete, UserUpdate
-from auth_handler import signJWT, decodeJWT, authentication
-from auth_bearer import JWTBearer
+from auth.jwt import signJWT, decodeJWT
+from auth.authentication import authentication
+from auth.bearer import JWTBearer
 
 
 router = APIRouter()
