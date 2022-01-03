@@ -1,5 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, constr
+from fastapi import File
 
 import datetime
 
@@ -23,7 +24,6 @@ class UserBase(BaseModel):
 
 class UserProfileBase(BaseModel):
 	handle: Optional[constr(max_length=30)]
-	profile_image: Optional[constr(max_length=100)]
 	
 
 class UserCreate(UserBase, UserProfileBase):
@@ -46,6 +46,7 @@ class User(UserBase):
 	is_active: bool
 	password: str
 	salt: str
+	profile_image: str
 	
 
 	class Config:
