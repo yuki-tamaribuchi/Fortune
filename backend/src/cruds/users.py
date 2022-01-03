@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from fastapi import UploadFile
 
 from models import User
 from schemas import UserUpdate
@@ -26,12 +27,13 @@ def create_user(db:Session, username:str, password:str, handle:str, profile_imag
 		return
 
 
-def update_user(db:Session, username:str, user_update_data:UserUpdate):
+def update_user(db:Session, username:str, user_update_data:UserUpdate, profile_image:UploadFile):
+
+
 	try:
 		db.query(User).filter(User.username==username).update(
 			{
-				User.handle:user_update_data.handle,
-				User.profile_image:user_update_data.profile_image
+				User.handle:user_update_data.handle
 			}
 		)
 		db.commit()
