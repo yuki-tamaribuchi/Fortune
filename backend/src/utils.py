@@ -17,3 +17,10 @@ def hash_password(password:str):
 	key = calc_hash(password, salt)
 
 	return salt.hex(), key.hex()
+
+
+def save_image(image_object, path, filename):
+	import boto3
+
+	s3_client = boto3.client('s3')
+	
