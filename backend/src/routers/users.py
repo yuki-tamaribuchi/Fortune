@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from sqlalchemy.orm import Session
 
 from dependencies import get_db
@@ -48,9 +48,10 @@ async def user_read(username:str , db:Session=Depends(get_db)):
 
 
 @router.post("/users/")
-async def user_update(user_update_data:UserUpdate ,db:Session=Depends(get_db), jwt_payload=Depends(JWTBearer())):
+async def user_update(user_update_data:UserUpdate, profile_image: UploadFile=File(...), db:Session=Depends(get_db), jwt_payload=Depends(JWTBearer())):
 	decoded_payload = decodeJWT(jwt_payload)
-	user_updated_instance = update_user(db=db, username=decoded_payload['username'], user_update_data=user_update_data)
+	user_updated_instance = update_user(db=db, username=decoded_payload['username'], user_update_data=user_update_data, profile_image=profile_image)
+	
 
 
 @router.delete("/users", status_code=status.HTTP_200_OK)
