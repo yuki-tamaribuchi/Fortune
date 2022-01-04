@@ -7,6 +7,7 @@ from schemas import UserCreate, UserLogin, UserDelete, UserUpdate
 from auth.jwt import signJWT, decodeJWT
 from auth.authentication import authentication
 from auth.bearer import JWTBearer
+from utils import save_image
 
 
 router = APIRouter()
@@ -48,9 +49,29 @@ async def user_read(username:str , db:Session=Depends(get_db)):
 
 
 @router.post("/users/")
-async def user_update(user_update_data:UserUpdate, profile_image: UploadFile=File(...), db:Session=Depends(get_db), jwt_payload=Depends(JWTBearer())):
+async def user_update(user_update_data:UserUpdate, profile_image: UploadFile=File(None), db:Session=Depends(get_db), jwt_payload=Depends(JWTBearer())):
 	decoded_payload = decodeJWT(jwt_payload)
 	user_updated_instance = update_user(db=db, username=decoded_payload['username'], user_update_data=user_update_data, profile_image=profile_image)
+
+
+@router.post("/users/image")
+async def user_update_profile_image(profile_image:UploadFile=File(...), db:Session=Depends(get_db), jwt_payload=Depends(JWTBearer())):
+	print(profile_image.content_type)
+	if profile_image.content_type == 'image/jpeg' or profile_image.content_type == 'image/png':
+		if profile_image.content_type == 'image/jpeg':
+			ext = '.jpeg'
+		else:
+			ext = '.png'
+
+		decoded_payload = decodeJWT(jwt_payload)
+		path = 'images/profile/'
+		filename = decoded_payload['username'] + ext
+		path_and_filename = path + filename
+		if save_image(image_object=profile_image.file, path_and_filename=path_and_filename):
+			return
+		raise HTTPException(409)
+	raise HTTPException(422)
+
 	
 
 
