@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from fastapi import UploadFile
 
 from models import User
@@ -23,8 +24,9 @@ def create_user(db:Session, username:str, password:str, handle:str, profile_imag
 		db.commit()
 		db.refresh(db_user)
 		return db_user
-	except:
-		return
+	except SQLAlchemyError:
+		db.rollback()
+		
 
 
 def update_user(db:Session, username:str, user_update_data:UserUpdate, profile_image:UploadFile):
@@ -38,8 +40,8 @@ def update_user(db:Session, username:str, user_update_data:UserUpdate, profile_i
 		)
 		db.commit()
 		return True
-	except:
-		return
+	except SQLAlchemyError:
+		db.rollback()
 
 def update_user_profile_image(db:Session, username:str, profile_image_filename:str):
 	try:
@@ -50,23 +52,23 @@ def update_user_profile_image(db:Session, username:str, profile_image_filename:s
 		)
 		db.commit()
 		return True
-	except:
-		return False
+	except SQLAlchemyError:
+		db.rollback()
 
 def delete_user(db:Session, username_instance):
 	try:
 		db.query(User).filter(User.id==username_instance.id).update({User.is_active:0})
 		db.commit()
 		return True
-	except:
-		return False
+	except SQLAlchemyError:
+		db.rollback()
 
 
 def read_user(db:Session, username:str):
 	statement = select(User).filter_by(username=username)
 	try:
 		result = db.execute(statement).first()._asdict()['User']
-	except:
+	except SQLAlchemyError:
 		result = None
 
 	return result
