@@ -41,6 +41,17 @@ def update_user(db:Session, username:str, user_update_data:UserUpdate, profile_i
 	except:
 		return
 
+def update_user_profile_image(db:Session, username:str, profile_image_filename:str):
+	try:
+		db.query(User).filter(User.username==username).update(
+			{
+				User.profile_image:profile_image_filename
+			}
+		)
+		db.commit()
+		return True
+	except:
+		return False
 
 def delete_user(db:Session, username_instance):
 	try:
