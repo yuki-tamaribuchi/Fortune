@@ -67,8 +67,9 @@ def delete_user(db:Session, username_instance):
 def read_user(db:Session, username:str):
 	statement = select(User).filter_by(username=username)
 	try:
-		result = db.execute(statement).first()._asdict()['User']
+		result = db.execute(statement).first()
+		if result:
+			return result._asdict()['User']
+		return
 	except SQLAlchemyError:
-		result = None
-
-	return result
+		return
