@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from sqlalchemy.orm import Session
 
 from dependencies import get_db
-from cruds.users import create_user, read_user, delete_user, update_user
+from cruds.users import create_user, read_user, delete_user, update_user, update_user_profile_image
 from schemas import UserCreate, UserLogin, UserDelete, UserUpdate
 from auth.jwt import signJWT, decodeJWT
 from auth.authentication import authentication
@@ -56,7 +56,6 @@ async def user_update(user_update_data:UserUpdate, profile_image: UploadFile=Fil
 
 @router.post("/users/image")
 async def user_update_profile_image(profile_image:UploadFile=File(...), db:Session=Depends(get_db), jwt_payload=Depends(JWTBearer())):
-	print(profile_image.content_type)
 	if profile_image.content_type == 'image/jpeg' or profile_image.content_type == 'image/png':
 		if profile_image.content_type == 'image/jpeg':
 			ext = '.jpeg'
@@ -67,9 +66,13 @@ async def user_update_profile_image(profile_image:UploadFile=File(...), db:Sessi
 		path = 'images/profile/'
 		filename = decoded_payload['username'] + ext
 		path_and_filename = path + filename
-		if save_image(image_object=profile_image.file, path_and_filename=path_and_filename):
+
+		try:
+			save_image(image_object=profile_image.file, path_and_filename=path_and_filename)
+			update_user_profile_image(db, decoded_payload['username'], filename)
 			return
-		raise HTTPException(409)
+		except:
+			raise HTTPException(409)
 	raise HTTPException(422)
 
 	
