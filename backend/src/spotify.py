@@ -1,4 +1,4 @@
-def get_track_from_spotify():
+async def get_track_from_spotify():
 	import random
 	from spotipy import Spotify
 	from spotipy.oauth2 import SpotifyClientCredentials
