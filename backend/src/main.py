@@ -1,8 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from routers import users, histories
 
+import logging
+import logging.config
+
+logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+
+logger = logging.getLogger(__name__)
 
 #Base.metadata.create_all(bind=engine)
 
@@ -25,3 +31,9 @@ app.add_middleware(
 
 app.include_router(users.router)
 app.include_router(histories.router)
+
+
+@app.get("/")
+async def root():
+	logger.info("logging from the root logger")
+	return {"status":"alive"}
